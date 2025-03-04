@@ -18,7 +18,6 @@ class RLPPOTrainer:
         )
         
         for batch in ppo_trainer.dataloader:
-            # Generate responses
             response_tensors = ppo_trainer.generate(
                 batch["input_ids"],
                 return_prompt=False,
@@ -26,9 +25,7 @@ class RLPPOTrainer:
             )
             responses = self.tokenizer.batch_decode(response_tensors)
             
-            # Compute rewards
             rewards = [reward_fn(resp, batch["reference_answer"]) for resp in responses]
             
-            # PPO Step
             stats = ppo_trainer.step(response_tensors, rewards)
             print(f"Step rewards: {rewards}")
