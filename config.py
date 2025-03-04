@@ -19,7 +19,6 @@ BNB_CONFIG = BitsAndBytesConfig(
     bnb_4bit_compute_dtype="float16"
 )
 
-
 TRAINING_ARGS = TrainingArguments(
     output_dir="./output",
     per_device_train_batch_size=1,
@@ -32,18 +31,12 @@ TRAINING_ARGS = TrainingArguments(
     num_train_epochs=1,
 )
 
-
+# Updated PPOConfig to match current TRL library requirements
 ppo_config = PPOConfig(
-        batch_size=1,
-        learning_rate=1.41e-5,
-        steps=1000,
-        init_kl_coef=0.1,
-        adap_kl_ctrl=True,
-        target_kl=1.0,
-        gamma=1.0,
-        lam=0.95,
-        cliprange=0.2,
-        cliprange_value=0.2,
-        vf_coef=0.1,
-        ppo_epochs=4,
-    )
+    batch_size=1,
+    learning_rate=1.41e-5,
+    gamma=1.0,
+    cliprange=0.2,
+    cliprange_value=0.2,
+    vf_coef=0.1,
+)

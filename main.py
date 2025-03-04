@@ -1,3 +1,4 @@
+import torch
 from config import *
 from model_setup import setup_model, setup_tokenizer
 from data_loader import load_sft_data, load_rl_data
@@ -6,19 +7,32 @@ from rl_trainer import RLPPOTrainer
 from reward import simple_reward
 
 def main(task_type="rl"):
-    model = setup_model()
+    # Set device
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    print(f"Using device: {device}")
+    
+    # Setup model and tokenizer
+    model = setup_model().to(device)
     tokenizer = setup_tokenizer()
     
-    if task_type == "sft":
-        sft_data = load_sft_data()
-        sft_trainer = SFTTrainer(model, tokenizer, sft_data)
-        sft_trainer.train(TRAINING_ARGS)
-        model.save_pretrained("./sft_model")
-        
-    elif task_type == "rl":
-        rl_data = load_rl_data()
-        rl_trainer = RLPPOTrainer(model, tokenizer, rl_data)
-        rl_trainer.train(ppo_config=ppo_config, reward_fn=simple_reward)
-        
+    try:
+        if task_type == "sft":
+            # Supervised Fine-Tuning
+            sft_data = load_sft_data()
+            sft_trainer = SFTTrainer(model, tokenizer, sft_data)
+            sft_trainer.train(TRAINING_ARGS)
+            model.save_pretrained("./sft_model")
+            
+        elif task_type == "rl":
+            # Reinforcement Learning
+            rl_data = load_rl_data()
+            rl_trainer = RLPPOTrainer(model, tokenizer, rl_data)
+            rl_trainer.train(ppo_config=ppo_config, reward_fn=simple_reward)
+    
+    except Exception as e:
+        print(f"An error occurred during training: {e}")
+        import traceback
+        traceback.print_exc()
+
 if __name__ == "__main__":
     main(task_type="rl")
