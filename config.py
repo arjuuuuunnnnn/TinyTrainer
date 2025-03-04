@@ -1,4 +1,5 @@
 from transformers import TrainingArguments, BitsAndBytesConfig
+from trl import PPOConfig
 
 MODEL_NAME = "TinyLlama/TinyLlama-1.1B-Chat-v1.0"
 USE_LORA = True
@@ -30,3 +31,19 @@ TRAINING_ARGS = TrainingArguments(
     max_grad_norm=0.3,
     num_train_epochs=1,
 )
+
+
+ppo_config = PPOConfig(
+        batch_size=1,
+        learning_rate=1.41e-5,
+        steps=1000,
+        init_kl_coef=0.1,
+        adap_kl_ctrl=True,
+        target_kl=1.0,
+        gamma=1.0,
+        lam=0.95,
+        cliprange=0.2,
+        cliprange_value=0.2,
+        vf_coef=0.1,
+        ppo_epochs=4,
+    )
