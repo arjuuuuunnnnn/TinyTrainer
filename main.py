@@ -7,7 +7,6 @@ from rl_trainer import RLPPOTrainer
 from reward import simple_reward
 
 def main(task_type="rl"):
-    # Set device
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Using device: {device}")
     
