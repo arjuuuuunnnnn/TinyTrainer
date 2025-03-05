@@ -6,7 +6,7 @@ USE_LORA = True
 USE_4BIT = True  # for low vram usage
 
 LORA_CONFIG = {
-    "r": 8,
+    "r": 16,
     "lora_alpha": 16,
     "lora_dropout": 0.05,
     "target_modules": ["q_proj", "v_proj"],  # for tinyllama
@@ -40,3 +40,4 @@ ppo_config = PPOConfig(
     cliprange_value=0.2,
     vf_coef=0.1,
 )
+

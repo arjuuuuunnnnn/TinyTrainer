@@ -13,6 +13,7 @@ def main(task_type="rl"):
     # Setup model and tokenizer
     model = setup_model().to(device)
     tokenizer = setup_tokenizer()
+    print("model and tokenizer done")
     
     try:
         if task_type == "sft":
