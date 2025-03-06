@@ -33,11 +33,13 @@ TRAINING_ARGS = TrainingArguments(
 
 # Updated PPOConfig to match current TRL library requirements
 ppo_config = PPOConfig(
+    output_dir="./ppo_output",
     batch_size=1,
     learning_rate=1.41e-5,
     gamma=1.0,
     cliprange=0.2,
     cliprange_value=0.2,
     vf_coef=0.1,
+    max_grad_norm=0.3,
 )
 
