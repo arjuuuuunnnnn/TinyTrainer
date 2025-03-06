@@ -6,7 +6,6 @@ class SFTTrainer:
         self.model = model
         self.tokenizer = tokenizer
         
-        # Process the dataset for training
         self.processed_dataset = dataset.map(
             lambda x: tokenize_sft_data(x, tokenizer),
             batched=False,
@@ -14,12 +13,6 @@ class SFTTrainer:
         )
         
     def train(self, training_args):
-        """
-        Train the model using the Transformers Trainer
-        
-        Args:
-            training_args: TrainingArguments object
-        """
         print("Starting supervised fine-tuning...")
         
         trainer = Trainer(
@@ -29,7 +22,6 @@ class SFTTrainer:
             tokenizer=self.tokenizer
         )
         
-        # Start training
         trainer.train()
         
         print("Supervised fine-tuning completed.")

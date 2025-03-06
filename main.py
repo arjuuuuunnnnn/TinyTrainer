@@ -8,21 +8,12 @@ from rl_trainer import RLPPOTrainer
 from reward import simple_reward
 
 def main(task_type="rl"):
-    """
-    Main function to run either supervised fine-tuning or PPO reinforcement learning
-    
-    Args:
-        task_type: "sft" for supervised fine-tuning or "rl" for reinforcement learning
-    """
-    # Check if CUDA is available
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Using device: {device}")
     
-    # Create output directories if they don't exist
     os.makedirs("./output", exist_ok=True)
     os.makedirs("./ppo_output", exist_ok=True)
     
-    # Setup model and tokenizer
     print("Setting up model and tokenizer...")
     model = setup_model()
     tokenizer = setup_tokenizer()
@@ -30,7 +21,6 @@ def main(task_type="rl"):
     
     try:
         if task_type.lower() == "sft":
-            # Supervised Fine-Tuning
             print("Loading SFT data...")
             sft_data = load_sft_data()
             print(f"SFT data loaded with {len(sft_data['train'])} examples")
@@ -47,7 +37,6 @@ def main(task_type="rl"):
             print("SFT training complete")
             
         elif task_type.lower() == "rl":
-            # Reinforcement Learning with PPO
             print("Loading RL data...")
             rl_data = load_rl_data()
             print(f"RL data loaded with {len(rl_data['train'])} examples")
@@ -73,9 +62,7 @@ def main(task_type="rl"):
 
 if __name__ == "__main__":
     import sys
-    
-    # Get task type from command line if provided
-    task_type = "rl"  # Default
+    task_type = "rl"
     if len(sys.argv) > 1:
         task_type = sys.argv[1]
     

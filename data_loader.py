@@ -8,7 +8,7 @@ def load_rl_data():
     return load_dataset("json", data_files="data/rl_data.json")
 
 def tokenize_sft_data(example, tokenizer):
-    # Assuming format is {"prompt": "...", "completion": "..."}
+    # {"prompt": "...", "completion": "..."}
     prompt = example["prompt"]
     completion = example["completion"]
     

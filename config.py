@@ -5,7 +5,6 @@ MODEL_NAME = "TinyLlama/TinyLlama-1.1B-Chat-v1.0"
 USE_LORA = True
 USE_4BIT = True  # for low vram usage
 
-# LoRA configuration - targeting attention layers
 LORA_CONFIG = {
     "r": 16,
     "lora_alpha": 16,
