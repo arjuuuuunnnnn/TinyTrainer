@@ -1,55 +1,101 @@
+import torch
 from trl import PPOTrainer
-from transformers import DataCollatorForLanguageModeling
-from data_loader import tokenize_fn
+from transformers import AutoTokenizer
+from data_loader import prepare_rl_dataset
 
 class RLPPOTrainer:
     def __init__(self, model, tokenizer, dataset):
-        self.ppo_model = model
+        self.model = model
         self.tokenizer = tokenizer
-        self.dataset = dataset.map(lambda x: tokenize_fn(x, tokenizer))
-        self.data_collator = DataCollatorForLanguageModeling(tokenizer, mlm=False)
+        self.dataset = prepare_rl_dataset(dataset['train'], tokenizer)
         
     def train(self, ppo_config, reward_fn):
-        # Prepare PPO Trainer arguments based on the config
-        ppo_trainer_args = {
-            "model": self.ppo_model,
-            "tokenizer": self.tokenizer,
-            "dataset": self.dataset['train'],
-            "data_collator": self.data_collator,
-            "batch_size": ppo_config.batch_size,
-            "learning_rate": ppo_config.learning_rate,
-            "max_length": 512,  # Add a max length for generation
-            "output_dir": ppo_config.output_dir,
-        }
+        """
+        Train model using PPO
+        
+        Args:
+            ppo_config: PPO configuration
+            reward_fn: Function to calculate rewards
+        """
+        print("Starting PPO training...")
         
         # Create PPO Trainer
-        ppo_trainer = PPOTrainer(**ppo_trainer_args)
+        ppo_trainer = PPOTrainer(
+            config=ppo_config,
+            model=self.model,
+            tokenizer=self.tokenizer,
+            dataset=self.dataset
+        )
         
         # Training loop
-        for epoch in range(1):  # You might want to use ppo_config.num_train_epochs if available
-            for batch in ppo_trainer.dataloader:
+        for epoch in range(1):  # Use a fixed number of epochs for simplicity
+            print(f"Starting epoch {epoch+1}/1")
+            
+            for batch_idx, batch in enumerate(ppo_trainer.dataloader):
                 try:
-                    # Prepare query tensors
-                    query_tensors = batch["input_ids"].to(self.ppo_model.device)
+                    # Get query tensors from the batch
+                    query_tensors = batch["input_ids"].to(self.model.device)
                     
-                    # Generate responses
-                    response_tensors = ppo_trainer.generate(
-                        query_tensors,
-                        max_new_tokens=200
-                    )
+                    # Get the reference answers for reward calculation
+                    reference_answers = batch.get("reference_answer", [""] * len(query_tensors))
                     
-                    # Decode responses
-                    responses = self.tokenizer.batch_decode(response_tensors)
+                    # Generate responses using the model
+                    response_tensors = []
+                    for query in query_tensors:
+                        # Reshape for single sample generation if needed
+                        if query.dim() == 1:
+                            query = query.unsqueeze(0)
+                            
+                        # Generate response
+                        with torch.no_grad():
+                            generation = ppo_trainer.generate(
+                                query, 
+                                max_new_tokens=256,
+                                do_sample=True,
+                                temperature=0.7
+                            )
+                            
+                        # Store just the generated part (excluding the query)
+                        response_tensors.append(generation)
                     
-                    # Calculate rewards (assuming batch contains 'reference_answer')
-                    rewards = [reward_fn(resp, batch.get("reference_answer", "")) for resp in responses]
+                    # Convert response tensors to a single batch tensor if not already
+                    if isinstance(response_tensors[0], torch.Tensor):
+                        response_tensors = torch.stack(response_tensors)
+                    
+                    # Decode responses to text
+                    decoded_responses = [
+                        self.tokenizer.decode(r, skip_special_tokens=True) 
+                        for r in response_tensors
+                    ]
+                    
+                    # Calculate rewards
+                    rewards = [
+                        reward_fn(resp, ref) 
+                        for resp, ref in zip(decoded_responses, reference_answers)
+                    ]
+                    
+                    # Convert rewards to tensor
+                    rewards_tensor = torch.tensor(rewards).to(self.model.device)
                     
                     # Perform PPO step
-                    stats = ppo_trainer.step(query_tensors, response_tensors, rewards)
+                    train_stats = ppo_trainer.step(
+                        queries=query_tensors,
+                        responses=response_tensors,
+                        scores=rewards_tensor
+                    )
                     
-                    print(f"Epoch step - Rewards: {rewards}")
+                    # Log progress
+                    if batch_idx % 5 == 0:
+                        print(f"Epoch {epoch+1}, Batch {batch_idx}, Mean reward: {torch.mean(rewards_tensor).item():.4f}")
+                        # Print a sample response
+                        if decoded_responses:
+                            print(f"Sample response: {decoded_responses[0][:100]}...")
                 
                 except Exception as e:
                     print(f"Error in training step: {e}")
                     import traceback
                     traceback.print_exc()
+                    continue  # Continue with next batch instead of stopping
+        
+        print("PPO training completed.")
+        return self.model
