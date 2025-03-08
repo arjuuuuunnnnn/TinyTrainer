@@ -8,6 +8,8 @@ class RLPPOTrainer:
         self.model = model
         self.tokenizer = tokenizer
         self.dataset = prepare_rl_dataset(dataset['train'], tokenizer)
+        print("RL dataset example:", self.dataset)
+        print("RL dataset input_ids shape", self.dataset[0]['input_ids'].shape)
         
     def train(self, ppo_config, reward_fn):
         print("Starting PPO training...")

@@ -9,7 +9,7 @@ LORA_CONFIG = {
     "r": 16,
     "lora_alpha": 16,
     "lora_dropout": 0.05,
-    "target_modules": ["q_proj", "v_proj"],  # for tinyllama
+    "target_modules": ["q_proj", "v_proj"],
     "bias": "none"
 }
 

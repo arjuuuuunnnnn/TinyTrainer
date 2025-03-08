@@ -11,6 +11,8 @@ class SFTTrainer:
             batched=False,
             remove_columns=dataset["train"].column_names
         )
+        print("Processed dataset example:", self.processed_dataset["train"][0])
+        print("Processed dataset input_ids shape:", self.processed_dataset["train"][0]["input_ids"].shape) # debugg
         
     def train(self, training_args):
         print("Starting supervised fine-tuning...")
