@@ -6,6 +6,6 @@ def custom_repeat_kv(hidden_states, num_key_value_groups):
         hidden_states = hidden_states.view(batch, num_key_value_heads, slen, head_dim)
     return original_repeat_kv(hidden_states, num_key_value_groups)
 
-# Override the function in the transformers library
+# Override
 import transformers.integrations.sdpa_attention
 transformers.integrations.sdpa_attention.repeat_kv = custom_repeat_kv

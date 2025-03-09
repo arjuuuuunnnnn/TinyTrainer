@@ -20,7 +20,7 @@ BNB_CONFIG = BitsAndBytesConfig(
     bnb_4bit_compute_dtype="float16"
 )
 
-# Supervised fine-tuning configuration
+# sft config
 TRAINING_ARGS = TrainingArguments(
     output_dir="./output",
     per_device_train_batch_size=1,
@@ -33,21 +33,5 @@ TRAINING_ARGS = TrainingArguments(
     num_train_epochs=1,
     save_strategy="steps",
     save_steps=500,
-    remove_unused_columns=False,  # Important for custom datasets
+    remove_unused_columns=False,
 )
-
-# Simplified PPO configuration with only supported parameters
-# ppo_config = PPOConfig(
-#     learning_rate=1.41e-5,
-#     batch_size=1,
-#     mini_batch_size=1,
-#     gradient_accumulation_steps=4,
-#     gamma=1.0,
-#     lam=0.95,
-#     cliprange=0.2,
-#     cliprange_value=0.2,
-#     vf_coef=0.1,
-#     seed=42,
-#     max_grad_norm=0.3,
-#     output_dir="./ppo_output",
-# )

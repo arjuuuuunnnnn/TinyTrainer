@@ -1,4 +1,3 @@
-# main.py
 import torch
 import os
 from config import *
@@ -9,7 +8,7 @@ from rl_trainer import RLPPOTrainer
 from reward import simple_reward
 from trl import PPOConfig
 
-# Import the custom attention override BEFORE loading the model
+
 import custom_attention
 
 def main(task_type="rl"):
