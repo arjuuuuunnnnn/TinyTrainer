@@ -9,16 +9,28 @@ class RLPPOTrainer:
         self.tokenizer = tokenizer
         self.dataset = prepare_rl_dataset(dataset['train'], tokenizer)
         print("RL dataset example:", self.dataset)
-        print("RL dataset input_ids shape", self.dataset[0]['input_ids'].shape)
+        print("RL dataset input_ids length:", len(self.dataset[0]['input_ids']))
         
-    def train(self, ppo_config, reward_fn):
+    def train(self, ppo_params, reward_fn):
         print("Starting PPO training...")
         
+        # Pass the ppo parameters directly to PPOTrainer
         ppo_trainer = PPOTrainer(
-            config=ppo_config,
             model=self.model,
             tokenizer=self.tokenizer,
-            dataset=self.dataset
+            dataset=self.dataset,
+            learning_rate=ppo_params["learning_rate"],
+            batch_size=ppo_params["batch_size"],
+            mini_batch_size=ppo_params["mini_batch_size"],
+            gradient_accumulation_steps=ppo_params["gradient_accumulation_steps"],
+            gamma=ppo_params["gamma"],
+            lam=ppo_params["lam"],
+            cliprange=ppo_params["cliprange"],
+            cliprange_value=ppo_params["cliprange_value"],
+            vf_coef=ppo_params["vf_coef"],
+            seed=ppo_params["seed"],
+            max_grad_norm=ppo_params["max_grad_norm"],
+            output_dir=ppo_params["output_dir"]
         )
         
         for epoch in range(1):

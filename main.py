@@ -49,7 +49,23 @@ def main(task_type="rl"):
             rl_trainer = RLPPOTrainer(model, tokenizer, rl_data)
             
             print("Starting RL training...")
-            trained_model = rl_trainer.train(ppo_config=ppo_config, reward_fn=simple_reward)
+            
+            ppo_params = {
+                "learning_rate": 1.41e-5,
+                "batch_size": 1,
+                "mini_batch_size": 1,
+                "gradient_accumulation_steps": 4,
+                "gamma": 1.0,
+                "lam": 0.95,
+                "cliprange": 0.2,
+                "cliprange_value": 0.2,
+                "vf_coef": 0.1,
+                "seed": 42,
+                "max_grad_norm": 0.3,
+                "output_dir": "./ppo_output"
+            }
+
+            trained_model = rl_trainer.train(ppo_params=ppo_params, reward_fn=simple_reward)
             
             print("Saving RL-trained model...")
             trained_model.save_pretrained("./rl_model")
