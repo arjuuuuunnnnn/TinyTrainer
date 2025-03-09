@@ -20,8 +20,35 @@ class RLPPOTrainer:
         # Print dataset info for debugging
         print(f"RL dataset size: {len(self.dataset)}")
         print(f"RL dataset keys: {list(self.dataset[0].keys())}")
-        print(f"RL dataset example input_ids shape: {self.dataset[0]['input_ids'].shape if 'input_ids' in self.dataset[0] else 'Missing'}")
-        print(f"RL dataset example attention_mask: {self.dataset[0]['attention_mask'].shape if 'attention_mask' in self.dataset[0] else 'Missing'}")
+        
+        # Safer way to check input_ids shape
+        if 'input_ids' in self.dataset[0]:
+            input_ids = self.dataset[0]['input_ids']
+            if hasattr(input_ids, 'shape'):
+                print(f"RL dataset example input_ids shape: {input_ids.shape}")
+            else:
+                print(f"RL dataset example input_ids type: {type(input_ids)}, converting to tensor...")
+                # Convert to tensor if it's not already
+                if isinstance(input_ids, list):
+                    # Apply conversion to the entire dataset
+                    def ensure_tensors(example):
+                        if 'input_ids' in example and isinstance(example['input_ids'], list):
+                            example['input_ids'] = torch.tensor(example['input_ids'], dtype=torch.long)
+                        if 'attention_mask' in example and isinstance(example['attention_mask'], list):
+                            example['attention_mask'] = torch.tensor(example['attention_mask'], dtype=torch.long)
+                        return example
+                    
+                    self.dataset = self.dataset.map(ensure_tensors)
+                    print("Converted dataset list items to tensors")
+        
+        if 'attention_mask' in self.dataset[0]:
+            attention_mask = self.dataset[0]['attention_mask']
+            if hasattr(attention_mask, 'shape'):
+                print(f"RL dataset example attention_mask shape: {attention_mask.shape}")
+            else:
+                print(f"RL dataset example attention_mask type: {type(attention_mask)}")
+        else:
+            print("RL dataset example attention_mask: Missing")
         
     def train(self, ppo_params, reward_fn):
         print("Starting PPO training...")
@@ -105,10 +132,30 @@ class RLPPOTrainer:
                     tensors = [sample[key] for sample in batch if key in sample]
                     if tensors:
                         if isinstance(tensors[0], torch.Tensor):
-                            collated_batch[key] = torch.stack(tensors)
+                            # Check if all tensors have the same shape
+                            shapes = [t.shape for t in tensors]
+                            if len(set(shapes)) == 1:  # All shapes are the same
+                                collated_batch[key] = torch.stack(tensors)
+                            else:
+                                # Handle tensors with different shapes
+                                max_len = max(t.shape[0] for t in tensors)
+                                padded_tensors = []
+                                for t in tensors:
+                                    if t.shape[0] < max_len:
+                                        padding = torch.zeros(max_len - t.shape[0], dtype=t.dtype, device=t.device)
+                                        t_padded = torch.cat([t, padding], dim=0)
+                                        padded_tensors.append(t_padded)
+                                    else:
+                                        padded_tensors.append(t)
+                                collated_batch[key] = torch.stack(padded_tensors)
                         else:
                             # Convert to tensors if they aren't already
-                            collated_batch[key] = torch.tensor([t for t in tensors])
+                            try:
+                                collated_batch[key] = torch.tensor([t for t in tensors], dtype=torch.long)
+                            except Exception as e:
+                                print(f"Error converting to tensor: {e}, using first item only")
+                                # Fallback to using just the first item
+                                collated_batch[key] = torch.tensor([tensors[0]], dtype=torch.long)
                 elif key == 'reference_answer':
                     # For text fields, just collect them
                     collated_batch[key] = [sample.get(key, "") for sample in batch]
@@ -165,40 +212,121 @@ class RLPPOTrainer:
                             query = query.unsqueeze(0)
                             
                         with torch.no_grad():
-                            generation = self.model.generate(
-                                query, 
-                                max_new_tokens=256,
-                                do_sample=True,
-                                temperature=0.7
-                            )
-                            
-                        response_tensors.append(generation)
+                            try:
+                                generation = self.model.generate(
+                                    query, 
+                                    max_new_tokens=256,
+                                    do_sample=True,
+                                    temperature=0.7
+                                )
+                                response_tensors.append(generation)
+                            except Exception as e:
+                                print(f"Error generating response: {e}")
+                                # Add a dummy response in case of error
+                                response_tensors.append(query)  # Use the query as a fallback
                     
-                    if isinstance(response_tensors[0], torch.Tensor):
-                        response_tensors = torch.stack(response_tensors)
+                    # Debug the response tensors
+                    print(f"Generated {len(response_tensors)} responses")
+                    for i, resp in enumerate(response_tensors[:2]):  # Print first 2 for debugging
+                        print(f"Response {i} type: {type(resp)}, shape: {resp.shape if hasattr(resp, 'shape') else 'N/A'}")
                     
-                    decoded_responses = [
-                        self.tokenizer.decode(r, skip_special_tokens=True) 
-                        for r in response_tensors
-                    ]
+                    # Decode the generated responses - handle different tensor formats
+                    decoded_responses = []
+                    for response in response_tensors:
+                        try:
+                            # Handle different possible formats of the response tensor
+                            if isinstance(response, torch.Tensor):
+                                # If it's a 2D tensor, take the first sequence
+                                if response.dim() > 1:
+                                    response_ids = response[0].tolist()
+                                else:
+                                    response_ids = response.tolist()
+                                
+                                # Now decode the list of ids
+                                decoded = self.tokenizer.decode(response_ids, skip_special_tokens=True)
+                            elif isinstance(response, list):
+                                # If it's already a list, decode directly
+                                decoded = self.tokenizer.decode(response, skip_special_tokens=True)
+                            else:
+                                print(f"Unknown response type: {type(response)}")
+                                decoded = "Error decoding response"
+                                
+                            decoded_responses.append(decoded)
+                        except Exception as e:
+                            print(f"Error decoding response: {e}")
+                            decoded_responses.append("Error decoding")
                     
-                    rewards = [
-                        reward_fn(resp, ref) 
-                        for resp, ref in zip(decoded_responses, reference_answers)
-                    ]
+                    if decoded_responses:
+                        print(f"First decoded response: {decoded_responses[0][:50]}...")
+                    
+                    # Calculate rewards
+                    rewards = []
+                    for resp, ref in zip(decoded_responses, reference_answers):
+                        try:
+                            reward = reward_fn(resp, ref)
+                            rewards.append(reward)
+                        except Exception as e:
+                            print(f"Error calculating reward: {e}")
+                            rewards.append(0.0)
                     
                     rewards_tensor = torch.tensor(rewards).to(self.model.device)
                     
-                    train_stats = ppo_trainer.step(
-                        queries=query_tensors,
-                        responses=response_tensors,
-                        scores=rewards_tensor
-                    )
+                    # Prepare response tensors for PPO step
+                    ppo_responses = []
+                    for response in response_tensors:
+                        if isinstance(response, torch.Tensor):
+                            # If it's a 2D tensor with batch dim, keep it
+                            if response.dim() > 1 and response.shape[0] == 1:
+                                ppo_responses.append(response)
+                            # If it's a 1D tensor or batch with > 1, unsqueeze
+                            elif response.dim() == 1 or response.shape[0] > 1:
+                                # For safety, only use the first sequence if batch > 1
+                                if response.dim() > 1 and response.shape[0] > 1:
+                                    response = response[0].unsqueeze(0)
+                                else:
+                                    response = response.unsqueeze(0)
+                                ppo_responses.append(response)
+                        else:
+                            print(f"Skipping response with type {type(response)}")
                     
-                    if batch_idx % 5 == 0:
-                        print(f"Epoch {epoch+1}, Batch {batch_idx}, Mean reward: {torch.mean(rewards_tensor).item():.4f}")
-                        if decoded_responses:
-                            print(f"Sample response: {decoded_responses[0][:100]}...")
+                    if not ppo_responses:
+                        print("No valid responses for PPO step, skipping batch")
+                        continue
+                    
+                    # Make sure query_tensors matches ppo_responses in batch dimension
+                    if len(ppo_responses) != query_tensors.shape[0]:
+                        print(f"Mismatch in batch size: queries={query_tensors.shape[0]}, responses={len(ppo_responses)}")
+                        # Adjust query_tensors to match
+                        if query_tensors.shape[0] > len(ppo_responses):
+                            query_tensors = query_tensors[:len(ppo_responses)]
+                        else:
+                            # Duplicate last query to match
+                            while len(ppo_responses) > query_tensors.shape[0]:
+                                query_tensors = torch.cat([query_tensors, query_tensors[-1:]], dim=0)
+                    
+                    # Make sure rewards matches the batch size
+                    if len(rewards) != len(ppo_responses):
+                        print(f"Adjusting rewards tensor to match responses: {len(rewards)} -> {len(ppo_responses)}")
+                        if len(rewards) > len(ppo_responses):
+                            rewards_tensor = rewards_tensor[:len(ppo_responses)]
+                        else:
+                            # Pad with zeros
+                            padding = torch.zeros(len(ppo_responses) - len(rewards), device=rewards_tensor.device)
+                            rewards_tensor = torch.cat([rewards_tensor, padding])
+                    
+                    try:
+                        train_stats = ppo_trainer.step(
+                            queries=query_tensors,
+                            responses=ppo_responses,
+                            scores=rewards_tensor
+                        )
+                        
+                        if batch_idx % 5 == 0:
+                            print(f"Epoch {epoch+1}, Batch {batch_idx}, Mean reward: {torch.mean(rewards_tensor).item():.4f}")
+                    except Exception as e:
+                        print(f"Error in PPO step: {e}")
+                        import traceback
+                        traceback.print_exc()
                 
                 except Exception as e:
                     print(f"Error in training step: {e}")

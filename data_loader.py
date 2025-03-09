@@ -50,10 +50,19 @@ def prepare_rl_dataset(dataset, tokenizer):
     # Apply tokenization with error handling
     def safe_tokenize(example):
         try:
-            return tokenize_rl_data(example, tokenizer)
+            result = tokenize_rl_data(example, tokenizer)
+            
+            # Ensure input_ids and attention_mask are tensors, not lists
+            if 'input_ids' in result and not isinstance(result['input_ids'], torch.Tensor):
+                result['input_ids'] = torch.tensor(result['input_ids'], dtype=torch.long)
+            
+            if 'attention_mask' in result and not isinstance(result['attention_mask'], torch.Tensor):
+                result['attention_mask'] = torch.tensor(result['attention_mask'], dtype=torch.long)
+                
+            return result
         except Exception as e:
             print(f"Error tokenizing example: {e}")
-            # Return a minimally valid example
+            # Return a minimally valid example with tensor types
             return {
                 "input_ids": torch.zeros(512, dtype=torch.long),
                 "attention_mask": torch.zeros(512, dtype=torch.long),
@@ -68,5 +77,10 @@ def prepare_rl_dataset(dataset, tokenizer):
     print(f"Dataset after tokenization: {len(tokenized_dataset)} examples")
     if len(tokenized_dataset) > 0:
         print(f"Example keys: {list(tokenized_dataset[0].keys())}")
+        # Check and print tensor types for debugging
+        for key in tokenized_dataset[0]:
+            if key != "reference_answer":
+                value = tokenized_dataset[0][key]
+                print(f"Key {key} type: {type(value)}, shape: {value.shape if hasattr(value, 'shape') else 'N/A'}")
     
     return tokenized_dataset
