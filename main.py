@@ -7,6 +7,7 @@ from data_loader import load_sft_data, load_rl_data
 from sft_trainer import SFTTrainer
 from rl_trainer import RLPPOTrainer
 from reward import simple_reward
+from trl import PPOConfig
 
 # Import the custom attention override BEFORE loading the model
 import custom_attention
