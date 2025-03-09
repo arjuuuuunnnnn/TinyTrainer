@@ -15,11 +15,9 @@ def tokenize_sft_data(example, tokenizer):
     full_text = f"{prompt}\n{completion}"
     
     tokenized = tokenizer(full_text, truncation=True, max_length=512, 
-                          padding="max_length", return_tensors="pt")
-    print("Tokenized input_ids shape:", tokenized["input_ids"].shape)
-    print("Tokenized attention_mask shape:", tokenized["attention_mask"].shape)
+                          padding="max_length")
     
-    tokenized["labels"] = tokenized["input_ids"].clone()
+    tokenized["labels"] = tokenized["input_ids"].copy()
     
     return tokenized
 
