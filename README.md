@@ -2,7 +2,7 @@
 
 ## Overview
 
-This project provides a framework for fine-tuning small language models (LLMs) using two powerful techniques:
+This project provides a framework for fine-tuning small language models (LMs) using two powerful techniques:
 1. Supervised Fine-Tuning (SFT)
 2. Reinforcement Learning (RL)
 
@@ -100,6 +100,12 @@ To run Reinforcement Learning:
 ```bash
 python main.py rl
 ```
+
+## Support & Contributions  
+
+If you find this project useful, consider giving it a ⭐ to show your support!  
+
+Want to contribute? Feel free to open a Pull Request (PR) with your improvements or ideas. Contributions are always welcome! 
 
 
 ## License
