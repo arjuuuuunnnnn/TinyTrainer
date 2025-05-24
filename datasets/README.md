@@ -1,0 +1,7 @@
+[GSM8K](https://huggingface.co/datasets/openai/gsm8k)
+[SVAMP](https://huggingface.co/datasets/ChilleD/SVAMP)
+[AQUA-RAT](https://huggingface.co/datasets/Chinar/AQuA-RAT)
+[MATH-QA](https://huggingface.co/datasets/allenai/math_qa)
+[BOOLQ](https://huggingface.co/datasets/google/boolq)
+[ARC](https://huggingface.co/datasets/allenai/ai2_arc)
+[COMMONSENSE-QA](https://huggingface.co/datasets/Sadanto3933/commonsense_qa)
