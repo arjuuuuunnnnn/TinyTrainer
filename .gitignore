@@ -1,2 +1,3 @@
-datasets/data
-datasets/artifacts
+datasets/data/
+datasets/artifacts/
+datasets/sft_data/
