@@ -13,33 +13,60 @@ def format_instruction(f_n):
     with open(f_n, 'r') as f:
         dataset = json.load(f)
         formatted_data = []
+
         for data in dataset:
+            problem = data['Problem'].strip()
+            rationale = data['Rationale'].strip()
+            correct_answer = data['correct'].strip()
+
+            options_text = ", ".join(data['options'])
+
             formatted_item = {
-                f"text": (
+                "text": (
                     f"### Instruction:\n"
-                    f"Problem: {data['Problem']}\n"
-                    f"Rationale: {data['Rationale']}\n"
-                    f"options: {data['options']}\n"
-                    f"category: {data['category']}\n"
-                    f"annotated_formula: {data['annotated_formula']}\n"
-                    f"Linear Formula: {data['linear_formula']}\n"
-                    f"### Response:\n\n"
-                    f"Rationale: {data['Rationale']}\n"
-                    f"Answer: {data['correct']}\n"
+                    f"{problem}\n\n"
+                    f"Options: {options_text}\n\n"
+                    f"### Response:\n"
+                    f"Let me solve this step by step.\n\n"
+                    f"{rationale}\n\n"
+                    f"Therefore, the answer is {correct_answer}."
                 )
             }
             formatted_data.append(formatted_item)
-        return formatted_data
 
-def format_files(files_list):
+    print(f"MATH_QA: {len(formatted_data)} samples from {f_n}")
+    return formatted_data
+
+def format_files(files_list, output_file="data/math_qa_sft.jsonl"):
+
+    os.makedirs("data", exist_ok=True)
+
+    if os.path.exists(output_file):
+        os.remove(output_file)
+
+    total_samples = 0
+
     for file in files_list:
-        res = format_instruction(file)
-        for item in res:
-            with open("data/math_qa.jsonl", "a") as f:
-                f.write(json.dumps(item) + "\n")
+        if os.path.exists(file):
+            res = format_instruction(file)
 
-url="https://math-qa.github.io/math-QA/data/MathQA.zip"
-files_list = ["artifacts/challenge_test.json", "artifacts/dev.json", "artifacts/train.json"]
+            with open(output_file, "a", encoding='utf-8') as f:
+                for item in res:
+                    f.write(json.dumps(item, ensure_ascii=False) + "\n")
 
-download_and_extract(url)
-format_files(files_list)
+            total_samples += len(res)
+        else:
+            print(f"Warning: {file} not found, skipping...")
+
+    print(f"\nTotal samples formatted: {total_samples}")
+    print(f"Dataset saved to: {output_file}")
+
+def main():
+    url = "https://math-qa.github.io/math-QA/data/MathQA.zip"
+    files_list = ["artifacts/challenge_test.json", "artifacts/dev.json", "artifacts/train.json"]
+
+    download_and_extract(url)
+    format_files(files_list)
+
+if __name__ == "__main__":
+    main()
