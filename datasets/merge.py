@@ -7,13 +7,13 @@ input_dir = "data"
 output_file = "sft_data/sft_dataset.jsonl"
 
 file_limits = {
-    "alpaca_sft.jsonl": 5000,
-    "aqua_rat_sft.jsonl": 15000,
+    "alpaca_sft.jsonl": 6000,
+    "aqua_rat_sft.jsonl": 16000,
     "arc_sft.jsonl": 1119,
-    "boolq_sft.jsonl": 5000,
-    "dolly_sft.jsonl": 3000,
+    "boolq_sft.jsonl": 5500,
+    "dolly_sft.jsonl": 4000,
     "gsm8k_sft.jsonl": 7473,
-    "math_qa_sft.jsonl": 15000,
+    "math_qa_sft.jsonl": 16000,
     "svamp_sft.jsonl": 700
 }
 
