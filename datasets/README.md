@@ -1,5 +1,3 @@
-### SFT
-
 1. [GSM8K](https://huggingface.co/datasets/openai/gsm8k) - 7k all
 2. [SVAMP](https://huggingface.co/datasets/ChilleD/SVAMP) - 1k all
 3. [AQUA-RAT](https://huggingface.co/datasets/Chinar/AQuA-RAT) - 15k 
@@ -9,7 +7,7 @@
 7. [ALPACA](https://huggingface.co/datasets/tatsu-lab/alpaca) -5k
 8. [DOLLY](https://huggingface.co/datasets/databricks/databricks-dolly-15k) - 3k
 
-### CoT
+
 
 1. [StrategyQA](https://huggingface.co/datasets/voidful/StrategyQA)
 2. [GSM8K-CoT](https://huggingface.co/datasets/HongzheBi/gsm8k-cot)
