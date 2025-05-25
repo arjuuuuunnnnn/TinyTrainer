@@ -1,44 +1,73 @@
 import json
 import torch
-from transformers import AutoTokenizer, AutoModelForCausalLM, TrainingArguments, Trainer, BitsAndBytesConfig
-from transformers import DataCollatorForLanguageModeling
-from peft import LoraConfig, get_peft_model
+from transformers import (
+    AutoTokenizer, 
+    AutoModelForCausalLM, 
+    TrainingArguments, 
+    Trainer, 
+    BitsAndBytesConfig,
+    DataCollatorForLanguageModeling
+)
+from peft import LoraConfig, get_peft_model, prepare_model_for_kbit_training
 from datasets import load_dataset
+import os
 
-
-quantization_config = BitsAndBytesConfig(load_in_4bit=True)
-
-with open("config.json", "r") as f:
+with open("sft/sft_config.json", "r") as f:
     cfg = json.load(f)
 
 tokenizer = AutoTokenizer.from_pretrained(cfg["model_name"])
 if tokenizer.pad_token is None:
     tokenizer.pad_token = tokenizer.eos_token
 
-model_4bit = AutoModelForCausalLM.from_pretrained(
-    cfg["model_name"],
-    device_map="auto", # to change
-    torch_dtype=torch.bfloat16, # to change
-    quantization_config=quantization_config
-)
+is_distributed = int(os.environ.get("WORLD_SIZE", "1")) > 1
+
+if is_distributed:
+    quantization_config = BitsAndBytesConfig(
+        load_in_8bit=True,
+        llm_int8_enable_fp32_cpu_offload=True
+    )
+else:
+    quantization_config = BitsAndBytesConfig(
+        load_in_4bit=True,
+        bnb_4bit_compute_dtype=torch.float16,
+        bnb_4bit_quant_type="nf4"
+    )
+
+# is_distributed = int(os.environ.get("WORLD_SIZE", "1")) > 1
+local_rank = int(os.environ.get("LOCAL_RANK", "0"))
+if is_distributed:
+    model = AutoModelForCausalLM.from_pretrained(
+        cfg["model_name"],
+        device_map={"": local_rank},
+        torch_dtype=torch.float16,
+        quantization_config=quantization_config
+    )
+else:#for single GPU
+    model = AutoModelForCausalLM.from_pretrained(
+        cfg["model_name"],
+        device_map="auto",
+        torch_dtype=torch.float16,
+        quantization_config=quantization_config
+    )
+
+
+model = prepare_model_for_kbit_training(model)
 
 lora = LoraConfig(**cfg["lora_config"])
-model = get_peft_model(model_4bit, lora)
+model = get_peft_model(model, lora)
 model.print_trainable_parameters()
 
 dataset = load_dataset(cfg["dataset_path"], split="train")
 
-def tokenize(example):
-    prompt = example["text"]
-
-    output = tokenizer(
+def tokenize(sample):
+    prompt = sample["text"]
+    encoded = tokenizer(
         prompt, 
         truncation=True, 
         max_length=cfg["max_length"],
         padding=False,
         return_tensors=None
     )
-
     return {
         "input_ids": encoded["input_ids"],
         "attention_mask": encoded["attention_mask"]
@@ -55,10 +84,12 @@ args = TrainingArguments(
     learning_rate=cfg["learning_rate"],
     save_strategy=cfg["save_strategy"],
     save_total_limit=cfg["save_total_limit"],
-    bf16=cfg["use_bf16"],
+    fp16=cfg["use_fp16"],
     report_to="none",
     dataloader_drop_last=True,
-    remove_unused_columns=False
+    remove_unused_columns=False,
+    ddp_find_unused_parameters=False if is_distributed else None,
+    dataloader_pin_memory=False,
 )
 
 data_collator = DataCollatorForLanguageModeling(
@@ -71,9 +102,10 @@ trainer = Trainer(
     model=model,
     train_dataset=tokenized,
     args=args,
-    tokenizer=tokenizer,
+    processing_class=tokenizer,
     data_collator=data_collator
 )
+# tokenizer=tokenizer
 
 trainer.train()
 

@@ -11,13 +11,13 @@
   "save_strategy": "epoch",
   "save_total_limit": 2,
   "max_length": 1024,
-  "use_bf16": true,
+  "use_fp16": true,
   "lora_config": {
-    "r": 8,
+    "r": 16,
     "lora_alpha": 32,
     "lora_dropout": 0.1,
     "bias": "none",
-    "task_type": "CAUSAL_LM"
+    "task_type": "CAUSAL_LM",
+    "target_modules": ["q_proj", "v_proj", "k_proj", "o_proj", "gate_proj", "up_proj", "down_proj"]
   }
 }
-
