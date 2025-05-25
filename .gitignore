@@ -1,7 +1,5 @@
 datasets/data/
 datasets/artifacts/
 datasets/sft_data/
-sft.py
-sft_config.json
 README.md
 main_works.py

@@ -1,0 +1,23 @@
+{
+  "model_name": "TinyLlama/TinyLlama-1.1B-Chat-v1.0",
+  "dataset_path": "hemanthsbanur/Instruction_Response_SFT",
+  "output_dir": "tinyllama_sft_checkpoint",
+  "artifacts": "step_1_sft",
+  "train_batch_size": 4,
+  "gradient_accumulation_steps": 4,
+  "num_train_epochs": 3,
+  "logging_steps": 20,
+  "learning_rate": 0.0002,
+  "save_strategy": "epoch",
+  "save_total_limit": 2,
+  "max_length": 1024,
+  "use_bf16": true,
+  "lora_config": {
+    "r": 8,
+    "lora_alpha": 32,
+    "lora_dropout": 0.1,
+    "bias": "none",
+    "task_type": "CAUSAL_LM"
+  }
+}
+
