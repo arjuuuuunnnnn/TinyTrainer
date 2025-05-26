@@ -1,30 +1,30 @@
 {
   "model_name": "TinyLlama/TinyLlama-1.1B-Chat-v1.0",
-  "dataset_path": "hemanthsbanur/Instruction_Response_SFT",
-  "output_dir": "checkpoints/tinyllama_sft_checkpoint",
-  "artifacts": "checkponits/step_1_sft",
+  "sft_lora_path": "checkpoints/step_1_sft",
+  "dataset_path": "",
+  "output_dir": "checkpoints/tinyllama_cot_checkpoint",
+  "cot_output_dir": "checkpoints/step_2_cot",
+  "max_length": 1024,
   "train_batch_size": 4,
   "gradient_accumulation_steps": 4,
   "num_train_epochs": 3,
   "logging_steps": 20,
-  "learning_rate": 0.0002,
+  "learning_rate": 2e-4,
   "save_strategy": "epoch",
   "save_total_limit": 2,
-  "max_length": 1024,
   "use_fp16": true,
-  "lora_config": {
+  "cot_lora_config": {
     "r": 16,
     "lora_alpha": 32,
     "lora_dropout": 0.1,
     "bias": "none",
-    "task_type": "CAUSAL_LM",
     "target_modules": [
-      "q_proj", 
-      "v_proj", 
-      "k_proj", 
-      "o_proj", 
-      "gate_proj", 
-      "up_proj", 
+      "q_proj",
+      "k_proj",
+      "v_proj",
+      "o_proj",
+      "gate_proj",
+      "up_proj",
       "down_proj"
     ]
   }
