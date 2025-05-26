@@ -3,4 +3,5 @@ datasets/artifacts/
 datasets/sft_data/
 README.md
 notebooks/
+checkpoints/
 
