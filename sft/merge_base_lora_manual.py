@@ -6,8 +6,8 @@ from safetensors.torch import load_file, save_file
 from transformers import AutoTokenizer, AutoModelForCausalLM
 
 sft_config = "sft/sft_config.json"
-lora_adapter_config = "step_1_sft/adapter_config.json"
-tok_loc = "step_1_sft"
+lora_adapter_config = "checkpoints/step_1_sft/adapter_config.json"
+tok_loc = "checkponits/step_1_sft"
 
 def merge_lora_weights_manual():
     with open(sft_config, "r") as f:
@@ -37,7 +37,7 @@ def merge_lora_weights_manual():
         tokenizer.pad_token = tokenizer.eos_token
 
     #load lora adap wts
-    adapter_weights = load_file("step_1_sft/adapter_model.safetensors")
+    adapter_weights = load_file("checkpoints/step_1_sft/adapter_model.safetensors")
 
     print(f"Found {len(adapter_weights)} LoRA weight tensors")
 

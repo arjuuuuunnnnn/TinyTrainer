@@ -50,7 +50,6 @@ else:#for single GPU
         quantization_config=quantization_config
     )
 
-
 model = prepare_model_for_kbit_training(model)
 
 lora = LoraConfig(**cfg["lora_config"])

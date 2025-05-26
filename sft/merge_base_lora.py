@@ -2,7 +2,7 @@ import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from peft import PeftModel, PeftConfig
 
-lora_model_path = "step_1_sft"
+lora_model_path = "checkpoints/step_1_sft"
 
 peft_config = PeftConfig.from_pretrained(lora_model_path)
 base_model_name = peft_config.base_model_name_or_path
