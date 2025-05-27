@@ -9,8 +9,8 @@ from transformers import (
     DataCollatorForLanguageModeling
 )
 from peft import (
-    LoraConfig, 
-    get_peft_model, 
+    LoraConfig,
+    get_peft_model,
     prepare_model_for_kbit_training,
     PeftModel,
     TaskType
@@ -94,16 +94,7 @@ print(f"Percentage trainable: {100 * trainable_params / total_params:.2f}%")
 dataset = load_dataset(cfg["dataset_path"], split="train")
 
 def tokenize_cot(sample):
-    """
-    Tokenize CoT data. Expected format:
-    - For training: {"input": "question", "output": "step-by-step reasoning + answer"}
-    - Or single text format: {"text": "Question: ... Answer: step1, step2, ..."}
-    """
-    if "input" in sample and "output" in sample:
-        prompt = f"Question: {sample['input']}\nAnswer: {sample['output']}"
-    else:
-        prompt = sample["text"]
-
+    prompt = sample["text"]
     encoded = tokenizer(
         prompt,
         truncation=True,
@@ -117,11 +108,7 @@ def tokenize_cot(sample):
         "attention_mask": encoded["attention_mask"]
     }
 
-tokenized_dataset = dataset.map(
-    tokenize_cot, 
-    remove_columns=dataset.column_names,
-    desc="Tokenizing CoT dataset"
-)
+tokenized_dataset = dataset.map(tokenize_cot, remove_columns=dataset.column_names)
 
 
 training_args = TrainingArguments(
