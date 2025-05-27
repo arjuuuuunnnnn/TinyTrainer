@@ -1,6 +1,7 @@
 datasets/data/
 datasets/artifacts/
 datasets/sft_data/
+datasets/cot_data/
 README.md
 notebooks/
 checkpoints/
