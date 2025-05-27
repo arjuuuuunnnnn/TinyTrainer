@@ -1,7 +1,7 @@
 {
   "model_name": "TinyLlama/TinyLlama-1.1B-Chat-v1.0",
   "sft_lora_path": "checkpoints/step_1_sft",
-  "dataset_path": "",
+  "dataset_path": "hemanthsbanur/CoT",
   "output_dir": "checkpoints/tinyllama_cot_checkpoint",
   "cot_output_dir": "checkpoints/step_2_cot",
   "max_length": 1024,
