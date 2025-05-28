@@ -17,8 +17,8 @@ This project implements a multi-stage training approach to enhance TinyLlama's r
 - [x] Dataset Curation & Formatting
 - [x] Supervised Fine-tuning (SFT)
 - [x] Chain-of-Thought (CoT) Training
-- [] Preference Data Generation
-- [] DPO Training
+- [ ] Preference Data Generation
+- [ ] DPO Training
 
 ## Dataset Details
 
