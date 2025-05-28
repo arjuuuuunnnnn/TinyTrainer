@@ -14,13 +14,13 @@ This project implements a multi-stage training approach to enhance TinyLlama's r
 
 ## Training Pipeline Status
 
-[x] Dataset Curation & Formatting
-[x] Supervised Fine-tuning (SFT)
-[x] Chain-of-Thought (CoT) Training
-[] Preference Data Generation
-[] DPO Training
+- [x] Dataset Curation & Formatting
+- [x] Supervised Fine-tuning (SFT)
+- [x] Chain-of-Thought (CoT) Training
+- [] Preference Data Generation
+- [] DPO Training
 
-## 📋 Dataset Details
+## Dataset Details
 
 ### Stage 1: Supervised Fine-tuning (SFT)
 Multi-domain instruction following dataset combining **56k samples**:
@@ -36,7 +36,7 @@ Multi-domain instruction following dataset combining **56k samples**:
 | [Alpaca](https://huggingface.co/datasets/tatsu-lab/alpaca) | 5k | General | Instruction following tasks |
 | [Dolly](https://huggingface.co/datasets/databricks/databricks-dolly-15k) | 3k | General | Human-generated instructions |
 
-I have uploaded the formatted dataset to the huggingface ![hemanthsbanur/Instruction_Response_SFT](https://huggingface.co/datasets/hemanthsbanur/Instruction_Response_SFT) for easy access.
+I have uploaded the formatted dataset to the huggingface [hemanthsbanur/Instruction_Response_SFT](https://huggingface.co/datasets/hemanthsbanur/Instruction_Response_SFT) for easy access.
 
 ### Stage 2: Chain-of-Thought (CoT) Training  
 Reasoning enhancement dataset with **22.5k samples**:
@@ -46,6 +46,6 @@ Reasoning enhancement dataset with **22.5k samples**:
 | [MathInstruct](https://huggingface.co/datasets/TIGER-Lab/MathInstruct) | 22k | Math Reasoning | Step-by-step mathematical solutions |
 | Synthetic General CoT | 500 | General Reasoning | Custom generated reasoning chains |
 
-This dataset is also available on Huggingface ![hemanthsbanur/CoT](https://huggingface.co/datasets/hemanthsbanur/CoT) for easy access.
+This dataset is also available on Huggingface [hemanthsbanur/CoT](https://huggingface.co/datasets/hemanthsbanur/CoT) for easy access.
 
 
