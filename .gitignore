@@ -1,6 +1,11 @@
-datasets/*
+datasets/data/*
+datasets/cot_data/
+datasets/sft_data/
+datasets/artifacts/
 !datasets/data/synthetic_cot.jsonl
 !datasets/README.md
+
+
 archive.md
 notebooks/
 checkpoints/
