@@ -1,6 +1,6 @@
 datasets/
 !datasets/data/synthetic_cot.jsonl
-
+!datasets/README.md
 archive.md
 notebooks/
 checkpoints/
