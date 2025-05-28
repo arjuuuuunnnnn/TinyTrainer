@@ -16,12 +16,10 @@ for file in "$SCRIPT_DIR"/*.py; do
     echo "Running $filename..."
     python3 "$file"
     echo "dataset formatted and saved into <saas> directory"
-    echo "----------------------------------------------"
 done
 
 echo "All formatting scripts completed."
 echo "Now starting the merging process..."
-echo "----------------------------------------------"
 
 
 for merge_file in "${EXCLUDE_FILES[@]}"; do
