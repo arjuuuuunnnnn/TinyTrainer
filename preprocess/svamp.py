@@ -23,9 +23,9 @@ def format_instruction(sample):
 
 formatted_svamp = svamp.map(format_instruction, remove_columns=svamp.column_names)
 
-os.makedirs("data", exist_ok=True)
+os.makedirs("datasets/data", exist_ok=True)
 
-with open("data/svamp_sft.jsonl", "w") as f:
+with open("datasets/data/svamp_sft.jsonl", "w") as f:
     for sample in formatted_svamp:
         f.write(json.dumps(sample) + "\n")
 

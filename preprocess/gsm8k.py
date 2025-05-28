@@ -15,9 +15,9 @@ def format_instruction(sample):
     }
 
 formatted_gsm8k = gsm8k.map(format_instruction, remove_columns=gsm8k.column_names)
-os.makedirs("data", exist_ok=True)
+os.makedirs("datasets/data", exist_ok=True)
 
-with open("data/gsm8k_sft.jsonl", "w") as f:
+with open("datasets/data/gsm8k_sft.jsonl", "w") as f:
     for sample in formatted_gsm8k:
         f.write(json.dumps(sample) + "\n")
 

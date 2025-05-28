@@ -16,9 +16,9 @@ def format_instruction(sample):
 
 formatted_aqua_rat = aqua_rat.map(format_instruction, remove_columns=aqua_rat.column_names)
 
-os.makedirs("data", exist_ok=True)
+os.makedirs("datasets/data", exist_ok=True)
 
-with open("data/aqua_rat_sft.jsonl", "w") as f:
+with open("datasets/data/aqua_rat_sft.jsonl", "w") as f:
     for sample in formatted_aqua_rat:
         f.write(json.dumps(sample) + "\n")
 

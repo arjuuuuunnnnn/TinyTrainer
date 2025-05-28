@@ -32,9 +32,9 @@ def format_instruction(sample):
 
 formatted_arc = arc.map(format_instruction, remove_columns=arc.column_names)
 
-os.makedirs("data", exist_ok=True)
+os.makedirs("datasets/data", exist_ok=True)
 
-with open("data/arc_sft.jsonl", "w") as f:
+with open("datasets/data/arc_sft.jsonl", "w") as f:
     for sample in formatted_arc:
         f.write(json.dumps(sample) + "\n")
 

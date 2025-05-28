@@ -20,9 +20,9 @@ def format_instruction(sample):
 
 formatted_alpaca = alpaca.map(format_instruction, remove_columns=alpaca.column_names)
 
-os.makedirs("data", exist_ok=True)
+os.makedirs("datasets/data", exist_ok=True)
 
-with open("data/alpaca_sft.jsonl", "w") as f:
+with open("datasets/data/alpaca_sft.jsonl", "w") as f:
     for sample in formatted_alpaca:
         f.write(json.dumps(sample) + "\n")
 

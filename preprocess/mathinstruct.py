@@ -16,9 +16,9 @@ def format_instruction(sample):
 
 formatted_mathinstruct = mathinstruct.map(format_instruction, remove_columns=mathinstruct.column_names)
 
-os.makedirs("data", exist_ok=True)
+os.makedirs("datasets/data", exist_ok=True)
 
-with open("data/mathinstruct.jsonl", "w") as f:
+with open("datasets/data/mathinstruct.jsonl", "w") as f:
     for i in formatted_mathinstruct:
         f.write(json.dumps(i) + "\n")
 

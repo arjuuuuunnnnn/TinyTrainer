@@ -22,9 +22,9 @@ def format_instruction(sample):
 
 formatted_boolq = boolq.map(format_instruction, remove_columns=boolq.column_names)
 
-os.makedirs("data", exist_ok=True)
+os.makedirs("datasets/data", exist_ok=True)
 
-with open("data/boolq_sft.jsonl", "w") as f:
+with open("datasets/data/boolq_sft.jsonl", "w") as f:
     for sample in formatted_boolq:
         f.write(json.dumps(sample) + "\n")
 

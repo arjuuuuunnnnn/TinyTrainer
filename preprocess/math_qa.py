@@ -4,7 +4,7 @@ from urllib.request import urlopen
 from io import BytesIO
 import json
 
-def download_and_extract(url, dirr='artifacts'):
+def download_and_extract(url, dirr='datasets/artifacts'):
     http = urlopen(url)
     zipfile = ZipFile(BytesIO(http.read()))
     zipfile.extractall(path=dirr)
@@ -37,9 +37,9 @@ def format_instruction(f_n):
     print(f"MATH_QA: {len(formatted_data)} samples from {f_n}")
     return formatted_data
 
-def format_files(files_list, output_file="data/math_qa_sft.jsonl"):
+def format_files(files_list, output_file="datasets/data/math_qa_sft.jsonl"):
 
-    os.makedirs("data", exist_ok=True)
+    os.makedirs("datasets/data", exist_ok=True)
 
     if os.path.exists(output_file):
         os.remove(output_file)
@@ -63,7 +63,7 @@ def format_files(files_list, output_file="data/math_qa_sft.jsonl"):
 
 def main():
     url = "https://math-qa.github.io/math-QA/data/MathQA.zip"
-    files_list = ["artifacts/challenge_test.json", "artifacts/dev.json", "artifacts/train.json"]
+    files_list = ["datasets/artifacts/challenge_test.json", "datasets/artifacts/dev.json", "datasets/artifacts/train.json"]
 
     download_and_extract(url)
     format_files(files_list)

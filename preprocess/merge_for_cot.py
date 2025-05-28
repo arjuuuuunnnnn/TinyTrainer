@@ -1,10 +1,10 @@
 import json
 import os
 
-os.makedirs("cot_data", exist_ok=True)
+os.makedirs("datasets/cot_data", exist_ok=True)
 
-input_dir = "data"
-output_file = "cot_data/cot_dataset.jsonl"
+input_dir = "datasets/data"
+output_file = "datasets/cot_data/cot_dataset.jsonl"
 
 file_limits = {
     "synthetic_cot.jsonl": 501,

@@ -20,9 +20,9 @@ def format_instruction(sample):
 
 formatted_dolly = dolly.map(format_instruction, remove_columns=dolly.column_names)
 
-os.makedirs("data", exist_ok=True)
+os.makedirs("datasets/data", exist_ok=True)
 
-with open("data/dolly_sft.jsonl", "w") as f:
+with open("datasets/data/dolly_sft.jsonl", "w") as f:
     for sample in formatted_dolly:
         f.write(json.dumps(sample) + "\n")
 

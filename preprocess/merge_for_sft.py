@@ -1,10 +1,10 @@
 import json
 import os
 
-os.makedirs("sft_data", exist_ok=True)
+os.makedirs("datasets/sft_data", exist_ok=True)
 
-input_dir = "data"
-output_file = "sft_data/sft_dataset.jsonl"
+input_dir = "datasets/data"
+output_file = "datasets/sft_data/sft_dataset.jsonl"
 
 file_limits = {
     "alpaca_sft.jsonl": 6000,
