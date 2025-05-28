@@ -1,7 +1,6 @@
-datasets/data/
-datasets/artifacts/
-datasets/sft_data/
-datasets/cot_data/
+datasets/
+!datasets/data/synthetic_cot.jsonl
+
 archive.md
 notebooks/
 checkpoints/
