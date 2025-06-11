@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SCRIPT_DIR="./datasets"
+SCRIPT_DIR="./preprocess"
 
 EXCLUDE_FILES=("merge_for_sft.py" "merge_for_cot.py")
 
